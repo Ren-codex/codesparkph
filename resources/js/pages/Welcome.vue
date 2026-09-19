@@ -796,6 +796,7 @@ onBeforeUnmount(() => {
                     <Form
                         v-bind="BookingController.store.form()"
                         reset-on-success
+                        :options="{ preserveScroll: true, preserveState: true }"
                         class="mt-10 space-y-5"
                         v-slot="{ errors, processing }"
                         @success="openSuccess"
