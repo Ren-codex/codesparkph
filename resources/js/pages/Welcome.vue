@@ -10,7 +10,7 @@ import {
     X,
 } from '@lucide/vue';
 import type { CSSProperties } from 'vue';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import BookingController from '@/actions/App/Http/Controllers/BookingController';
 import CodeSparkLogo from '@/components/CodeSparkLogo.vue';
 import InputError from '@/components/InputError.vue';
@@ -226,6 +226,32 @@ const onDragEnd = (event: PointerEvent) => {
     }
 };
 
+// Booking confirmation modal.
+const successOpen = ref(false);
+const successClose = ref<HTMLButtonElement | null>(null);
+let lastFocused: HTMLElement | null = null;
+
+const openSuccess = async () => {
+    lastFocused = document.activeElement as HTMLElement | null;
+    successOpen.value = true;
+    document.body.style.overflow = 'hidden';
+
+    await nextTick();
+    successClose.value?.focus();
+};
+
+const closeSuccess = () => {
+    successOpen.value = false;
+    document.body.style.overflow = '';
+    lastFocused?.focus();
+};
+
+const onKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && successOpen.value) {
+        closeSuccess();
+    }
+};
+
 const pointer = ref({ x: 0, y: 0 });
 const tiltEnabled = ref(false);
 
@@ -255,11 +281,14 @@ onMounted(() => {
     finePointer = window.matchMedia('(min-width: 641px) and (pointer: fine)');
     finePointer.addEventListener('change', syncTilt);
     syncTilt();
+    window.addEventListener('keydown', onKeydown);
 });
 
 onBeforeUnmount(() => {
     finePointer?.removeEventListener('change', syncTilt);
     window.removeEventListener('mousemove', trackPointer);
+    window.removeEventListener('keydown', onKeydown);
+    document.body.style.overflow = '';
 });
 </script>
 
@@ -768,7 +797,8 @@ onBeforeUnmount(() => {
                         v-bind="BookingController.store.form()"
                         reset-on-success
                         class="mt-10 space-y-5"
-                        v-slot="{ errors, processing, recentlySuccessful }"
+                        v-slot="{ errors, processing }"
+                        @success="openSuccess"
                     >
                         <div class="grid gap-5 sm:grid-cols-2">
                             <div class="grid gap-2">
@@ -868,12 +898,6 @@ onBeforeUnmount(() => {
                             >
                                 {{ processing ? 'Sending…' : 'Send Request' }}
                             </Button>
-                            <p
-                                v-if="recentlySuccessful"
-                                class="accent text-sm font-medium"
-                            >
-                                Request received — we'll be in touch shortly.
-                            </p>
                         </div>
                     </Form>
                 </div>
@@ -933,6 +957,75 @@ onBeforeUnmount(() => {
                 </p>
             </div>
         </footer>
+
+        <!-- Booking confirmation. Kept inside .cs-page so it inherits the
+             landing page's theme tokens rather than the app-wide ones. -->
+        <Transition name="modal">
+            <div
+                v-if="successOpen"
+                class="modal-backdrop"
+                @click.self="closeSuccess"
+            >
+                <div
+                    ref="successDialog"
+                    class="modal"
+                    role="alertdialog"
+                    aria-modal="true"
+                    aria-labelledby="success-title"
+                    aria-describedby="success-body"
+                >
+                    <div class="success-mark">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path class="success-tick" d="m5 13 4 4L19 7" />
+                        </svg>
+                    </div>
+
+                    <h2 id="success-title" class="mt-5 text-2xl font-bold">
+                        Request received
+                    </h2>
+                    <p id="success-body" class="muted mt-3 text-sm">
+                        Thanks for reaching out. We'll review your project and
+                        get back to you with a plan, a timeline, and a quote.
+                    </p>
+
+                    <div class="modal-contact">
+                        <p class="subtle text-xs">Need us sooner?</p>
+                        <div class="mt-2 flex flex-wrap justify-center gap-2.5">
+                            <a
+                                :href="contact.phoneHref"
+                                class="contact-chip text-xs"
+                            >
+                                {{ contact.phone }}
+                            </a>
+                            <a
+                                :href="contact.facebook"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="contact-chip text-xs"
+                            >
+                                Facebook
+                            </a>
+                        </div>
+                    </div>
+
+                    <button
+                        ref="successClose"
+                        type="button"
+                        class="cta cta-primary mt-7 w-full"
+                        @click="closeSuccess"
+                    >
+                        Done
+                    </button>
+                </div>
+            </div>
+        </Transition>
     </div>
 </template>
 
@@ -1425,6 +1518,93 @@ onBeforeUnmount(() => {
     }
     .carousel-card {
         padding: 1.25rem;
+    }
+}
+
+/* Booking confirmation modal */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+    background: rgba(2, 6, 23, 0.6);
+    backdrop-filter: blur(6px);
+}
+
+.modal {
+    width: 100%;
+    max-width: 26rem;
+    border-radius: 1.25rem;
+    border: 1px solid var(--accent-border);
+    background: var(--surface-strong);
+    padding: 2.25rem 1.75rem;
+    text-align: center;
+    backdrop-filter: blur(20px);
+    box-shadow:
+        0 40px 90px -30px rgba(0, 0, 0, 0.6),
+        0 0 60px -20px var(--glow);
+}
+
+.success-mark {
+    margin-inline: auto;
+    display: grid;
+    height: 4rem;
+    width: 4rem;
+    place-items: center;
+    border-radius: 9999px;
+    background: var(--brand-grad);
+    color: var(--brand-grad-fg);
+    box-shadow: 0 16px 40px -14px var(--glow-hover);
+}
+.success-mark svg {
+    height: 2rem;
+    width: 2rem;
+}
+
+/* The tick draws itself in once the dialog appears. */
+.success-tick {
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
+    animation: draw-tick 420ms cubic-bezier(0.65, 0, 0.35, 1) 140ms forwards;
+}
+
+@keyframes draw-tick {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.modal-contact {
+    margin-top: 1.75rem;
+    border-top: 1px solid var(--line-soft);
+    padding-top: 1.25rem;
+}
+
+.modal-enter-active,
+.modal-leave-active {
+    transition: opacity 220ms ease;
+}
+.modal-enter-active .modal,
+.modal-leave-active .modal {
+    transition:
+        transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 260ms ease;
+}
+.modal-enter-from,
+.modal-leave-to {
+    opacity: 0;
+}
+.modal-enter-from .modal,
+.modal-leave-to .modal {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+}
+
+@media (max-width: 480px) {
+    .modal {
+        padding: 1.75rem 1.25rem;
     }
 }
 
@@ -1965,8 +2145,12 @@ onBeforeUnmount(() => {
     .panel,
     .ping,
     .cover-scan,
-    .gradient-text {
+    .gradient-text,
+    .success-tick {
         animation: none;
+    }
+    .success-tick {
+        stroke-dashoffset: 0;
     }
     .spotlight {
         display: none;
