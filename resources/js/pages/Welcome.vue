@@ -425,47 +425,55 @@ onBeforeUnmount(() => {
                                     : undefined
                             "
                         >
+                            <!-- Editor -->
                             <div class="panel panel-back">
                                 <div class="panel-bar">
                                     <span></span><span></span><span></span>
+                                    <span class="file-tab">Hero.vue</span>
                                 </div>
-                                <div class="space-y-2 p-5">
-                                    <div class="line line-cyan w-2/3"></div>
-                                    <div class="line w-5/6"></div>
-                                    <div class="line w-1/2"></div>
-                                    <div class="line line-violet w-3/4"></div>
-                                    <div class="line w-2/5"></div>
-                                </div>
+                                <pre
+                                    class="code"
+                                ><span class="ln"> 1</span><span class="t-punc">&lt;</span><span class="t-tag">template</span><span class="t-punc">&gt;</span>
+<span class="ln"> 2</span>  <span class="t-punc">&lt;</span><span class="t-comp">Hero</span>
+<span class="ln"> 3</span>    <span class="t-attr">title</span><span class="t-punc">=</span><span class="t-str">"Your business, online"</span>
+<span class="ln"> 4</span>    <span class="t-attr">cta</span><span class="t-punc">=</span><span class="t-str">"Book a project"</span>
+<span class="ln"> 5</span>    <span class="t-punc">:</span><span class="t-attr">bookings</span><span class="t-punc">=</span><span class="t-str">"true"</span>
+<span class="ln"> 6</span>  <span class="t-punc">/&gt;</span>
+<span class="ln"> 7</span><span class="t-punc">&lt;/</span><span class="t-tag">template</span><span class="t-punc">&gt;</span></pre>
                             </div>
 
+                            <!-- Rendered result -->
                             <div class="panel panel-mid">
-                                <p
-                                    class="accent text-[0.65rem] tracking-widest uppercase"
-                                >
-                                    Booking system
-                                </p>
-                                <p
-                                    class="mt-2 text-sm leading-snug font-semibold"
-                                >
-                                    Customers book themselves in
-                                </p>
-                                <p class="muted mt-1.5 text-xs leading-snug">
-                                    No more back-and-forth messages
-                                </p>
-                                <div class="meter mt-3.5">
-                                    <div class="meter-fill"></div>
+                                <div class="browser-bar">
+                                    <span class="browser-dot"></span>
+                                    <span class="browser-url"
+                                        >yourbusiness.ph</span
+                                    >
+                                </div>
+                                <div class="browser-body">
+                                    <div class="preview-hero"></div>
+                                    <div class="preview-row">
+                                        <span class="preview-pill"></span>
+                                        <span
+                                            class="preview-pill preview-pill-ghost"
+                                        ></span>
+                                    </div>
+                                    <div class="preview-cards">
+                                        <span></span><span></span><span></span>
+                                    </div>
                                 </div>
                             </div>
 
+                            <!-- Deploy toast -->
                             <div class="panel panel-front">
-                                <div class="flex items-center gap-3">
-                                    <div class="avatar">CS</div>
+                                <div class="flex items-center gap-2.5">
+                                    <span class="live-dot"></span>
                                     <div>
-                                        <p class="text-sm font-semibold">
-                                            Project Kickoff
+                                        <p class="text-xs font-semibold">
+                                            Deployed to production
                                         </p>
-                                        <p class="muted text-xs">
-                                            Confirmed — let's build
+                                        <p class="muted text-[0.65rem]">
+                                            Build passed · 1.2s
                                         </p>
                                     </div>
                                 </div>
@@ -958,10 +966,12 @@ onBeforeUnmount(() => {
     --field-bg: #ffffff;
     --glow: rgba(8, 145, 178, 0.35);
     --glow-hover: rgba(109, 40, 217, 0.4);
-    --line-cyan: rgba(8, 145, 178, 0.45);
-    --line-violet: rgba(109, 40, 217, 0.4);
     --punch-glow: none;
     --spot: rgba(8, 145, 178, 0.1);
+    --code-tag: #0e7490;
+    --code-comp: #6d28d9;
+    --code-attr: #b45309;
+    --code-str: #be185d;
     --shine: rgba(15, 23, 42, 0.05);
     --grain-opacity: 0.025;
 
@@ -996,10 +1006,12 @@ onBeforeUnmount(() => {
     --field-bg: rgba(2, 6, 23, 0.6);
     --glow: rgba(34, 211, 238, 0.7);
     --glow-hover: rgba(124, 58, 237, 0.8);
-    --line-cyan: rgba(34, 211, 238, 0.4);
-    --line-violet: rgba(167, 139, 250, 0.4);
     --punch-glow: drop-shadow(0 8px 32px rgba(124, 58, 237, 0.35));
     --spot: rgba(56, 232, 255, 0.09);
+    --code-tag: #67e8f9;
+    --code-comp: #c4b5fd;
+    --code-attr: #fcd34d;
+    --code-str: #f9a8d4;
     --shine: rgba(255, 255, 255, 0.07);
     --grain-opacity: 0.04;
 }
@@ -1613,7 +1625,7 @@ onBeforeUnmount(() => {
     right: -1.5rem;
     bottom: 3.5rem;
     width: 15rem;
-    padding: 1.25rem;
+    overflow: hidden;
     transform: translateZ(70px);
     animation: float 6s ease-in-out infinite 0.6s;
 }
@@ -1636,41 +1648,121 @@ onBeforeUnmount(() => {
     border-radius: 9999px;
     background: var(--line);
 }
-.line {
-    height: 0.55rem;
-    border-radius: 9999px;
-    background: var(--line);
-}
-.line-cyan {
-    background: var(--line-cyan);
-}
-.line-violet {
-    background: var(--line-violet);
+.file-tab {
+    margin-left: 0.5rem;
+    border-radius: 0.35rem;
+    background: var(--accent-bg);
+    padding: 0.1rem 0.5rem;
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--accent-fg);
 }
 
-.meter {
-    height: 0.375rem;
-    width: 100%;
+/* Editor pane */
+.code {
+    margin: 0;
+    overflow: hidden;
+    padding: 0.9rem 1rem 1.1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.66rem;
+    line-height: 1.85;
+    white-space: pre;
+    color: var(--page-fg);
+}
+.ln {
+    display: inline-block;
+    width: 1.6rem;
+    color: var(--subtle-fg);
+    opacity: 0.55;
+    user-select: none;
+}
+.t-tag {
+    color: var(--code-tag);
+}
+.t-comp {
+    color: var(--code-comp);
+}
+.t-attr {
+    color: var(--code-attr);
+}
+.t-str {
+    color: var(--code-str);
+}
+.t-punc {
+    color: var(--subtle-fg);
+}
+
+/* Rendered-site preview */
+.browser-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-bottom: 1px solid var(--line-soft);
+    padding: 0.5rem 0.65rem;
+}
+.browser-dot {
+    height: 0.4rem;
+    width: 0.4rem;
+    flex-shrink: 0;
     border-radius: 9999px;
     background: var(--line);
 }
-.meter-fill {
-    height: 100%;
-    width: 98%;
+.browser-url {
+    overflow: hidden;
     border-radius: 9999px;
+    background: var(--line-soft);
+    padding: 0.1rem 0.5rem;
+    font-size: 0.55rem;
+    color: var(--subtle-fg);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.browser-body {
+    padding: 0.7rem;
+}
+.preview-hero {
+    height: 2.1rem;
+    border-radius: 0.35rem;
     background: var(--brand-grad);
+    opacity: 0.85;
 }
-
-.avatar {
+.preview-row {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.3rem;
+}
+.preview-pill {
+    height: 0.6rem;
+    width: 2.2rem;
+    border-radius: 9999px;
+    background: var(--accent-dot);
+    opacity: 0.8;
+}
+.preview-pill-ghost {
+    width: 1.6rem;
+    background: var(--line);
+    opacity: 1;
+}
+.preview-cards {
+    margin-top: 0.55rem;
     display: grid;
-    height: 2.25rem;
-    width: 2.25rem;
-    place-items: center;
-    border-radius: 0.5rem;
-    background: var(--brand-grad);
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: var(--brand-grad-fg);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.3rem;
+}
+.preview-cards span {
+    height: 1.35rem;
+    border-radius: 0.3rem;
+    border: 1px solid var(--line-soft);
+    background: var(--line-soft);
+}
+
+.live-dot {
+    height: 0.5rem;
+    width: 0.5rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    background: #34d399;
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18);
 }
 
 @keyframes float {
