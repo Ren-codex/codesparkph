@@ -364,7 +364,7 @@ onBeforeUnmount(() => {
                         size="sm"
                         class="glow-button hidden sm:inline-flex"
                     >
-                        <a href="#booking">Start Building</a>
+                        <a href="#booking">Book</a>
                     </Button>
 
                     <button
